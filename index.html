@@ -343,7 +343,8 @@
                 fields: [
                     { name: 'name', label: 'ชื่อ-สกุล', type: 'text', required: true, width: 'md:col-span-1' },
                     { name: 'group_name', label: 'กลุ่มงาน', type: 'select', options: ['3.1', '3.2', '3.3', 'ธุรการ'], required: true, width: 'md:col-span-1' },
-                    { name: 'position', label: 'ตำแหน่ง', type: 'select', options: ['ข้าราชการ','พนักงานราชการ','ลูกจ้างชั่วคราว','จ้างเหมาบริการ'], required: true, width: 'md:col-span-1' },
+                    { name: 'type', label: 'ประเภทบุคลากร', type: 'select', options: ['ข้าราชการ','พนักงานราชการ','ลูกจ้างชั่วคราว','จ้างเหมาบริการ'], required: true, width: 'md:col-span-1' },
+                    { name: 'position', label: 'ตำแหน่ง', type: 'text', required: true, width: 'md:col-span-1' },
                     { name: 'level', label: 'ระดับ (ข้าราชการ)', type: 'select', options: ['-','ชำนาญการพิเศษ (ผู้อำนวยการ)','ชำนาญการพิเศษ','ชำนาญการ','ปฏิบัติการ','ชำนาญงาน','ปฏิบัติงาน'], required: false, width: 'md:col-span-1' },
                     { name: 'username', label: 'Username', type: 'text', required: true, width: 'md:col-span-1' },
                     { name: 'password', label: 'Password', type: 'text', required: true, width: 'md:col-span-1' },
@@ -403,7 +404,7 @@
             document.getElementById('view-app').classList.remove('hidden-view');
             let lvStr = currentUser.level && currentUser.level !== '-' ? ` (${currentUser.level})` : '';
             document.getElementById('sb-user-name').innerText = currentUser.name;
-            document.getElementById('sb-user-role').innerText = `${currentUser.position}${lvStr} • กลุ่ม ${currentUser.group_name}`;
+            document.getElementById('sb-user-role').innerText = `${currentUser.position || currentUser.type}${lvStr} • กลุ่ม ${currentUser.group_name}`;
             buildMenus(); loadModule('dashboard');
         }
 
@@ -506,25 +507,31 @@
                     </div>
                     <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col justify-center relative overflow-hidden">
                         <div class="absolute -right-3 -top-3 text-amber-50"><i data-lucide="award" class="w-16 h-16"></i></div>
-                        <p class="text-[11px] font-semibold text-slate-500 mb-1 relative z-10">รับเรื่องเสร็จสิ้น</p>
+                        <p class="text-[11px] font-semibold text-slate-500 mb-1 relative z-10">รับเรื่องทั้งหมด</p>
                         <h3 class="text-2xl font-bold text-slate-800 relative z-10" id="dash-reqs-done">0</h3>
                     </div>
                     <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col justify-center relative overflow-hidden">
-                        <div class="absolute -right-3 -top-3 text-blue-50"><i data-lucide="briefcase" class="w-16 h-16"></i></div>
-                        <p class="text-[11px] font-semibold text-slate-500 mb-1 relative z-10">งบโครงการ (บาท)</p>
-                        <h3 class="text-2xl font-bold text-slate-800 relative z-10" id="dash-budget">0</h3>
+                        <div class="absolute -right-3 -top-3 text-teal-50"><i data-lucide="clipboard-check" class="w-16 h-16"></i></div>
+                        <p class="text-[11px] font-semibold text-slate-500 mb-1 relative z-10">งานแล้วเสร็จ</p>
+                        <h3 class="text-2xl font-bold text-slate-800 relative z-10" id="dash-tasks-done">0</h3>
                     </div>
                     <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col justify-center relative overflow-hidden">
-                        <div class="absolute -right-3 -top-3 text-purple-50"><i data-lucide="users" class="w-16 h-16"></i></div>
-                        <p class="text-[11px] font-semibold text-slate-500 mb-1 relative z-10">บุคลากรทั้งหมด</p>
-                        <h3 class="text-2xl font-bold text-slate-800 relative z-10" id="dash-users">0</h3>
+                        <div class="absolute -right-3 -top-3 text-orange-50"><i data-lucide="hourglass" class="w-16 h-16"></i></div>
+                        <p class="text-[11px] font-semibold text-slate-500 mb-1 relative z-10">งานค้างคงเหลือ</p>
+                        <h3 class="text-2xl font-bold text-slate-800 relative z-10" id="dash-tasks-pending">0</h3>
                     </div>
                 </div>
                 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                     <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col">
                         <h3 class="font-bold text-slate-800 mb-4">สัดส่วนผลงานภาพรวม</h3>
-                        <div class="relative flex-1 min-h-[260px] w-full flex items-center justify-center"><canvas id="chartPie"></canvas></div>
+                        <div class="relative flex-1 min-h-[260px] w-full flex items-center justify-center">
+                            <canvas id="chartPie"></canvas>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none" style="margin-bottom: 28px;">
+                                <span class="text-5xl font-extrabold text-emerald-500 tracking-tight leading-none" id="chartPiePercent">0%</span>
+                                <span class="text-xs text-slate-400 font-semibold mt-2 tracking-wide">สำเร็จ</span>
+                            </div>
+                        </div>
                     </div>
                     <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col">
                         <h3 class="font-bold text-slate-800 mb-4">ผลงานรายเดือน (รวมทุกกลุ่ม)</h3>
@@ -532,9 +539,22 @@
                     </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 mb-6">
-                    <h3 class="font-bold text-slate-800 mb-6">ความคืบหน้าผลงานรายกิจกรรม</h3>
-                    <div class="flex flex-wrap gap-6 items-start" id="activityProgressContainer"><div class="text-sm text-slate-400">กำลังประมวลผล...</div></div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col">
+                        <h3 class="font-bold text-slate-800 mb-6">ความคืบหน้าผลงานรายกิจกรรม</h3>
+                        <div class="flex flex-col gap-5 w-full" id="activityProgressContainer"><div class="text-sm text-slate-400">กำลังประมวลผล...</div></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col">
+                        <h3 class="font-bold text-slate-800 mb-4">ข้อมูลบุคลากร</h3>
+                        <div class="flex items-center gap-4 mb-5 p-4 bg-indigo-50/60 rounded-2xl">
+                            <div class="w-14 h-14 bg-white text-primary rounded-2xl flex items-center justify-center shadow-sm shrink-0"><i data-lucide="users" class="w-7 h-7"></i></div>
+                            <div>
+                                <p class="text-xs text-slate-500 font-semibold">บุคลากรทั้งหมด</p>
+                                <h2 class="text-3xl font-bold text-slate-800" id="dash-personnel-total">0</h2>
+                            </div>
+                        </div>
+                        <div class="space-y-2.5" id="dash-personnel-breakdown"></div>
+                    </div>
                 </div>
 
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
@@ -560,12 +580,12 @@
             lucide.createIcons();
 
             try {
-                const [{data: goals}, {data: reports}, {data: projects}, {data: reqs}, {data: users}] = await Promise.all([
+                const [{data: goals}, {data: reports}, {data: projects}, {data: reqs}, {data: personnel}] = await Promise.all([
                     supabaseClient.from('goals').select('id, activity, amount, reports(amount), requests(id, status)'),
                     supabaseClient.from('reports').select('amount, month'),
                     supabaseClient.from('projects').select('*'),
                     supabaseClient.from('requests').select('status, created_at'),
-                    supabaseClient.from('users').select('id')
+                    supabaseClient.from('users').select('type')
                 ]);
 
                 const sumGoals = (goals||[]).reduce((a,b) => a + Number(b.amount||0), 0);
@@ -573,11 +593,27 @@
                 const reqsDoneList = (reqs||[]).filter(r => r.status === 'เสร็จสิ้น');
                 const totalDone = sumReports + reqsDoneList.length;
 
+                const tasksDoneCount = reqsDoneList.length;
+                const tasksPendingCount = Math.max(0, (reqs||[]).length - reqsDoneList.length);
+
                 document.getElementById('dash-goal').innerText = sumGoals.toLocaleString();
                 document.getElementById('dash-report').innerText = totalDone.toLocaleString();
-                document.getElementById('dash-reqs-done').innerText = reqsDoneList.length.toLocaleString();
-                document.getElementById('dash-budget').innerText = (projects||[]).reduce((a,b) => a + Number(b.budget||0), 0).toLocaleString();
-                document.getElementById('dash-users').innerText = (users||[]).length.toLocaleString();
+                document.getElementById('dash-reqs-done').innerText = (reqs||[]).length.toLocaleString();
+                document.getElementById('dash-tasks-done').innerText = tasksDoneCount.toLocaleString();
+                document.getElementById('dash-tasks-pending').innerText = tasksPendingCount.toLocaleString();
+
+                const personnelTypes = ['ข้าราชการ','พนักงานราชการ','ลูกจ้างชั่วคราว','จ้างเหมาบริการ'];
+                document.getElementById('dash-personnel-total').innerText = (personnel||[]).length.toLocaleString();
+                const pnBody = document.getElementById('dash-personnel-breakdown');
+                if (pnBody) {
+                    pnBody.innerHTML = personnelTypes.map(t => {
+                        const count = (personnel||[]).filter(p => p.type === t).length;
+                        return `<div class="flex items-center justify-between px-4 py-2.5 bg-slate-50/70 rounded-xl">
+                                    <span class="text-sm font-medium text-slate-600">${t}</span>
+                                    <span class="font-bold text-slate-800">${count.toLocaleString()}</span>
+                                </div>`;
+                    }).join('');
+                }
 
                 const pBody = document.getElementById('dash-projects-tracking-body');
                 if (pBody) {
@@ -601,9 +637,14 @@
                     }
                 }
 
+                const pieDone = totalDone;
+                const pieRemaining = Math.max(0, sumGoals - totalDone);
+                const piePercent = sumGoals > 0 ? Math.min(100, Math.round((pieDone / sumGoals) * 100)) : 0;
+                document.getElementById('chartPiePercent').innerText = `${piePercent}%`;
+
                 chartsInstance.pie = new Chart(document.getElementById('chartPie').getContext('2d'), {
                     type: 'doughnut',
-                    data: { labels: ['ทำแล้ว', 'เป้าหมายคงเหลือ'], datasets: [{ data: [totalDone, Math.max(0, sumGoals - totalDone)], backgroundColor: ['#10b981', '#f1f5f9'], borderWidth: 0 }] },
+                    data: { labels: ['ทำแล้ว', 'เป้าหมายคงเหลือ'], datasets: [{ data: [pieDone, pieRemaining], backgroundColor: ['#10b981', '#f1f5f9'], borderWidth: 0 }] },
                     options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { position: 'bottom' } } }
                 });
 
@@ -626,13 +667,19 @@
                     activityHtml = goals.map(g => {
                         const done = (g.reports||[]).reduce((a,b) => a+Number(b.amount||0), 0) + (g.requests||[]).filter(r => r.status === 'เสร็จสิ้น').length;
                         let p = g.amount > 0 ? Math.min(100, Math.round((done / g.amount) * 100)) : 0;
-                        let color = p === 100 ? '#10b981' : '#3b82f6';
+                        let color = '#f43f5e';
+                        if (p >= 100) color = '#10b981';
+                        else if (p >= 70) color = '#0ea5e9';
+                        else if (p >= 40) color = '#f59e0b';
                         return `
-                            <div class="flex flex-col items-center justify-center p-2 w-28">
-                                <div class="relative w-[76px] h-[76px] rounded-full flex items-center justify-center mb-3 shadow-sm" style="background: conic-gradient(${color} ${p}%, #e2e8f0 0);">
-                                    <div class="w-[60px] h-[60px] bg-white rounded-full flex items-center justify-center shadow-inner"><span class="text-base font-bold" style="color: ${color}">${p}%</span></div>
+                            <div class="w-full">
+                                <div class="flex justify-between items-end gap-3 mb-2">
+                                    <p class="text-sm font-semibold text-slate-700 leading-snug" title="${g.activity}">${g.activity}</p>
+                                    <span class="text-sm font-extrabold shrink-0" style="color: ${color}">${p}%</span>
                                 </div>
-                                <p class="text-xs font-medium text-slate-600 text-center w-full line-clamp-2 leading-tight" title="${g.activity}">${g.activity}</p>
+                                <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                                    <div class="h-full rounded-full transition-all duration-500" style="width: ${p}%; background: ${color};"></div>
+                                </div>
                             </div>`;
                     }).join('');
                 }
@@ -694,7 +741,7 @@
 							</div>
 							<div class="min-w-0 flex-1">
 								<h4 class="font-bold text-slate-800 truncate text-sm">${m.name}</h4>
-								<p class="text-[11px] font-medium text-slate-500 truncate">${m.position}</p>
+								<p class="text-[11px] font-medium text-slate-500 truncate">${m.position || m.type}${(m.level && m.level !== '-') ? ` • ${m.level}` : ''}</p>
 							</div>
 							
 							<!-- แสดงปุ่มชัดเจนถ้ามีสิทธิ์ -->
@@ -721,7 +768,7 @@
             const val = document.getElementById('orgSearchInput').value.toLowerCase();
             if(!window.allOrgUsers) return;
             const filtered = window.allOrgUsers.filter(u => {
-                return u.name.toLowerCase().includes(val) || (u.position && u.position.toLowerCase().includes(val)) || (u.group_name && u.group_name.toLowerCase().includes(val));
+                return u.name.toLowerCase().includes(val) || (u.position && u.position.toLowerCase().includes(val)) || (u.type && u.type.toLowerCase().includes(val)) || (u.group_name && u.group_name.toLowerCase().includes(val));
             });
             renderOrgBlocks(filtered);
         }
@@ -788,7 +835,7 @@
                             <div class="mt-14 flex flex-col md:flex-row md:justify-between md:items-end gap-4">
                                 <div>
                                     <h2 class="text-2xl font-bold text-slate-800">${currentUser.name}</h2>
-                                    <p class="text-slate-500 font-medium">${currentUser.position} ${currentUser.level !== '-' ? `(${currentUser.level})` : ''} • กลุ่ม ${currentUser.group_name}</p>
+                                    <p class="text-slate-500 font-medium">${currentUser.position || currentUser.type} ${currentUser.level !== '-' ? `(${currentUser.level})` : ''} • กลุ่ม ${currentUser.group_name}</p>
                                 </div>
                                 <button onclick="openLeaveModal()" class="bg-indigo-50 text-primary hover:bg-indigo-100 px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition shadow-sm border border-indigo-100"><i data-lucide="calendar-plus" class="w-4 h-4"></i> ยื่นใบลา</button>
                             </div>
@@ -1012,7 +1059,7 @@
 
             try {
                 const [{data: team}, {data: reqs}, {data: goals}] = await Promise.all([
-                    supabaseClient.from('users').select('id, name, position, level').eq('group_name', group),
+                    supabaseClient.from('users').select('id, name, position, type, level').eq('group_name', group),
                     supabaseClient.from('requests').select('*, goals(activity)').eq('receiving_unit', group).order('created_at', { ascending: false }),
                     supabaseClient.from('goals').select('*, reports(amount), requests(id, status)').eq('group_name', group).order('created_at', { ascending: false })
                 ]);
@@ -1027,7 +1074,7 @@
                             <div class="bg-white p-4 rounded-2xl border border-slate-200 flex justify-between items-center shadow-sm">
                                 <div class="overflow-hidden pr-2">
                                     <p class="font-bold text-slate-700 truncate">${u.name}</p>
-                                    <p class="text-[10px] text-slate-400 truncate">${u.position}</p>
+                                    <p class="text-[10px] text-slate-400 truncate">${u.position || u.type}</p>
                                 </div>
                                 <div class="text-right shrink-0">
                                     <span class="text-[10px] text-slate-400">กำลังทำ / เสร็จ</span><br>
